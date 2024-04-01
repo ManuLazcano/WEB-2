@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const usuarios = require('./usuarios');
-const eliminarSeguidorYSeguido = require('./eliminarSeguidorYSeguido.js');
+const eliminarSeguimiento = require('./eliminarSeguimiento.js');
 
 const app = express();
 app.use(bodyParser.json());
@@ -25,7 +25,7 @@ app.get('/usuarios/:id', (req, res) => {
     const usuario = usuarios.find(usuario => usuario.id === parseInt(id));
 
     /**
-     * Se seleccionan solo las propiedades 'id' y 'nombre' de los objetos 'seguidores' y 'seguidos' antes de incluirlos en la respuesta JSON. 
+     * Se seleccionan solo las propiedades 'id' y 'nombre' de los objetos 'seguidores', 'seguidos' y 'bloqueados' antes de incluirlos en la respuesta JSON. 
      * Esto evita las referencias circulares y permite enviar la respuesta correctamente.
      */
     if(usuario) {
@@ -77,7 +77,7 @@ app.delete('/usuarios/:id', (req, res) => {
         return res.status(404).send('Usuario no encontrado');
     }
 
-    const usuarioEliminado = usuarios.splice(usuarioIndex, 1);
+    usuarios.splice(usuarioIndex, 1);
     res.json('Ok');
 });
 
@@ -88,12 +88,13 @@ app.post('/seguimiento/:idSeguidor/:idSeguido', (req, res) => {
     const seguidorIndex = usuarios.findIndex(usuario => usuario.id === parseInt(idSeguidor));
     const seguidoIndex = usuarios.findIndex(usuario => usuario.id === parseInt(idSeguido));
     if(seguidorIndex === -1 || seguidoIndex === -1) {
-        return res.status(404).send('Not Found');
+        return res.status(404).send('No se encontro uno o ambos usuarios');
     }
 
-    const estaBloqueado = usuarios[seguidorIndex].bloqueados.find(bloqueado => bloqueado.id === parseInt(idSeguido));
+    const seguidoBloqueado = usuarios[seguidorIndex].bloqueados.find(bloqueado => bloqueado.id === parseInt(idSeguido));
+    const seguidorBloqueado = usuarios[seguidoIndex].bloqueados.find(bloqueado => bloqueado.id === parseInt(idSeguidor));
     const estaSiguiendo = usuarios[seguidorIndex].seguidos.find(seguido => seguido.id === parseInt(idSeguido));
-    if(estaBloqueado) {
+    if(seguidoBloqueado || seguidorBloqueado) {
         return res.status(400).send('Usuario bloqueado');
     }
     if(estaSiguiendo) {
@@ -111,8 +112,8 @@ app.delete('/seguimiento/:idSeguidor/:idSeguido', (req, res) => {
     const { idSeguidor, idSeguido } = req.params;
 
     try {
-        eliminarSeguidorYSeguido(idSeguidor, idSeguido);
-        res.status(200).send('Seguidor y seguidos eliminados');
+        eliminarSeguimiento(idSeguidor, idSeguido);
+        res.status(200).send('Se elimino de seguidos');
     } catch(error) {
         res.status(404).send(error.message);
     }
@@ -130,10 +131,12 @@ app.post('/bloqueo/:idUsuario/:idUsuarioBloqueado', (req, res) => {
             return res.status(404).send('Usuario no encontrado');
         }
         if(estaBloqueado) {
-            return res.status(400).send('Usuario ya esta bloqueado');
+            return res.status(400).send('El usuario ya esta bloqueado');
         }
 
-        eliminarSeguidorYSeguido(idUsuario, idUsuarioBloqueado);
+        eliminarSeguimiento(idUsuario, idUsuarioBloqueado);
+        usuarios[usuarioIndex].seguidores = usuarios[usuarioIndex].seguidores.filter(seguidor => seguidor.id !== parseInt(idUsuarioBloqueado));
+        usuarios[bloqueadoIndex].seguidos = usuarios[bloqueadoIndex].seguidos.filter(seguido => seguido.id !== parseInt(idUsuario));        
 
         usuarios[usuarioIndex].bloqueados.push(usuarios[bloqueadoIndex]);
 

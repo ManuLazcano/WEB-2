@@ -1,6 +1,6 @@
 const usuarios = require('./usuarios.js');
 
-function eliminarSeguidorYSeguido(idSeguidor, idSeguido) {
+function eliminarSeguimiento(idSeguidor, idSeguido) {
     const seguidorIndex = usuarios.findIndex(usuario => usuario.id === parseInt(idSeguidor));
     const seguidoIndex = usuarios.findIndex(usuario => usuario.id === parseInt(idSeguido));
 
@@ -9,10 +9,7 @@ function eliminarSeguidorYSeguido(idSeguidor, idSeguido) {
     }
 
     usuarios[seguidorIndex].seguidos = usuarios[seguidorIndex].seguidos.filter(seguido => seguido.id !== parseInt(idSeguido));
-    usuarios[seguidorIndex].seguidores = usuarios[seguidorIndex].seguidores.filter(seguidor => seguidor.id !== parseInt(idSeguido));
-
-    usuarios[seguidoIndex].seguidos = usuarios[seguidoIndex].seguidos.filter(seguido => seguido.id !== parseInt(idSeguidor));
     usuarios[seguidoIndex].seguidores = usuarios[seguidoIndex].seguidores.filter(seguidor => seguidor.id !== parseInt(idSeguidor));
 }
 
-module.exports = eliminarSeguidorYSeguido;
+module.exports = eliminarSeguimiento;
