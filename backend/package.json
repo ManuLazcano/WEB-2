@@ -13,6 +13,7 @@
   "author": "Manuel Lazcano <manu.lazcano17@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.19.2"
+    "express": "4.19.2",
+    "morgan": "1.10.0"
   }
 }
