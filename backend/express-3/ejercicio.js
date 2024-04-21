@@ -13,6 +13,16 @@ app.use(bodyParser.json());
 let idCurrentUser;
 let isAdmin;
 
+const opcions = {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false // Para usar formato de 24 horas
+};
+
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'uces',
@@ -98,11 +108,20 @@ app.post('/login', (req, res) => {
 });
 
 app.get('/eventos', requireLogin, (req, res) => {
-    connection.query('SELECT * FROM events', (err, rows) => {
-        if(err) {
-            throw err;
+    connection.query('SELECT e.id, e.datetime, e.title, COUNT(g.event_id) as guestCount FROM events e LEFT JOIN guests g ON e.id = g.event_id GROUP BY e.id', (err, rows) => {
+        if (err) {
+            console.error('Error al obtener eventos:', err);
+            return res.status(500).json({ error: 'Error al obtener eventos' });
         }
-        res.json(rows);
+
+        const response = rows.map(row => ({
+            id: row.id,
+            datetime: row.datetime.toLocaleDateString('es-Es', opcions),
+            title: row.title,
+            guestCount: row.guestCount
+        }));
+
+        res.json(response);
     });
 });
 

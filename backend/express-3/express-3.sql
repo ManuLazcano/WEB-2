@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 15-04-2024 a las 22:58:25
+-- Tiempo de generación: 22-04-2024 a las 01:26:49
 -- Versión del servidor: 10.4.24-MariaDB
 -- Versión de PHP: 8.1.6
 
@@ -20,6 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `express-3`
 --
+CREATE DATABASE IF NOT EXISTS `express-3` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `express-3`;
 
 -- --------------------------------------------------------
 
@@ -35,6 +37,14 @@ CREATE TABLE `events` (
   `description` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Volcado de datos para la tabla `events`
+--
+
+INSERT INTO `events` (`id`, `id_user`, `datetime`, `title`, `description`) VALUES
+(1, 3, '2024-04-11 05:00:00', 'Evento actualizado', 'Descripción'),
+(3, 1, '2024-04-18 11:30:19', 'Evento 3', 'Evento deportivo');
+
 -- --------------------------------------------------------
 
 --
@@ -44,6 +54,28 @@ CREATE TABLE `events` (
 CREATE TABLE `guests` (
   `event_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `guests`
+--
+
+INSERT INTO `guests` (`event_id`, `user_id`) VALUES
+(1, 1),
+(1, 3),
+(1, 5),
+(3, 1),
+(3, 4);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `tokens`
+--
+
+CREATE TABLE `tokens` (
+  `token` text NOT NULL,
+  `expires` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -89,6 +121,12 @@ ALTER TABLE `guests`
   ADD KEY `fk_guests_users` (`user_id`);
 
 --
+-- Indices de la tabla `tokens`
+--
+ALTER TABLE `tokens`
+  ADD UNIQUE KEY `token` (`token`) USING HASH;
+
+--
 -- Indices de la tabla `users`
 --
 ALTER TABLE `users`
@@ -103,7 +141,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT de la tabla `events`
 --
 ALTER TABLE `events`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT de la tabla `users`
